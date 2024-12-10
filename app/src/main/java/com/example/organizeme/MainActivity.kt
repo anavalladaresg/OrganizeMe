@@ -1,35 +1,81 @@
-package com.example.organizeme
+package com.example.organizeme.ui
 
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import com.example.organizeme.databinding.ActivityMainBinding
+import androidx.fragment.app.Fragment
+import com.example.organizeme.R
+import com.example.organizeme.ui.dashboard.DashboardFragment
+import com.example.organizeme.ui.home.HomeFragment
+import com.example.organizeme.ui.notifications.NotificationsFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationBarView
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val navView: BottomNavigationView = binding.navView
-
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        val appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+        // Configurar layout principal con BottomNavigationView programáticamente
+        val rootLayout = FrameLayout(this).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
             )
-        )
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        }
+
+        val navHostFragment = FrameLayout(this).apply {
+            id = View.generateViewId() // Genera un ID único para el FrameLayout
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+
+        val bottomNav = BottomNavigationView(this).apply {
+            id = View.generateViewId()
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = android.view.Gravity.BOTTOM
+            }
+
+            // Menú de navegación
+            menu.apply {
+                add(0, R.id.navigation_home, 0, "Inicio").setIcon(android.R.drawable.ic_menu_view)
+                add(0, R.id.navigation_dashboard, 1, "Dashboard").setIcon(android.R.drawable.ic_menu_manage)
+                add(0, R.id.navigation_notifications, 2, "Notificaciones").setIcon(android.R.drawable.ic_menu_info_details)
+            }
+        }
+
+        // Añadir vistas al rootLayout
+        rootLayout.addView(navHostFragment)
+        rootLayout.addView(bottomNav)
+        setContentView(rootLayout)
+
+        // Configurar la navegación entre fragmentos
+        bottomNav.setOnItemSelectedListener(NavigationBarView.OnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> loadFragment(HomeFragment())
+                R.id.navigation_dashboard -> loadFragment(DashboardFragment())
+                R.id.navigation_notifications -> loadFragment(NotificationsFragment())
+                else -> false
+            }
+        })
+
+        // Cargar el fragmento inicial
+        if (savedInstanceState == null) {
+            bottomNav.selectedItemId = R.id.navigation_home
+        }
+    }
+
+    private fun loadFragment(fragment: Fragment): Boolean {
+        supportFragmentManager.beginTransaction()
+            .replace(android.R.id.content, fragment)
+            .commit()
+        return true
     }
 }
