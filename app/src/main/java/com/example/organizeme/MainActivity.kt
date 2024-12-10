@@ -1,80 +1,54 @@
-package com.example.organizeme.ui
+package com.example.organizeme
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.organizeme.R
-import com.example.organizeme.ui.dashboard.DashboardFragment
-import com.example.organizeme.ui.home.HomeFragment
-import com.example.organizeme.ui.notifications.NotificationsFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.navigation.NavigationBarView
+import com.example.organizeme.ui.home.HomeFragment
+import com.example.organizeme.ui.search.SearchFragment
+import com.example.organizeme.ui.profile.ProfileFragment
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Configurar layout principal con BottomNavigationView programáticamente
-        val rootLayout = FrameLayout(this).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }
-
-        val navHostFragment = FrameLayout(this).apply {
-            id = View.generateViewId() // Genera un ID único para el FrameLayout
-            layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }
-
-        val bottomNav = BottomNavigationView(this).apply {
+        val container = FrameLayout(this).apply {
             id = View.generateViewId()
             layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
-                gravity = android.view.Gravity.BOTTOM
-            }
-
-            // Menú de navegación
-            menu.apply {
-                add(0, R.id.navigation_home, 0, "Inicio").setIcon(android.R.drawable.ic_menu_view)
-                add(0, R.id.navigation_dashboard, 1, "Dashboard").setIcon(android.R.drawable.ic_menu_manage)
-                add(0, R.id.navigation_notifications, 2, "Notificaciones").setIcon(android.R.drawable.ic_menu_info_details)
-            }
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
         }
+        setContentView(container)
 
-        // Añadir vistas al rootLayout
-        rootLayout.addView(navHostFragment)
-        rootLayout.addView(bottomNav)
-        setContentView(rootLayout)
+        val bottomNavigationView = BottomNavigationView(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM
+            )
+            menuInflater.inflate(R.menu.bottom_nav_menu, menu)
+        }
+        container.addView(bottomNavigationView)
 
-        // Configurar la navegación entre fragmentos
-        bottomNav.setOnItemSelectedListener(NavigationBarView.OnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.navigation_home -> loadFragment(HomeFragment())
-                R.id.navigation_dashboard -> loadFragment(DashboardFragment())
-                R.id.navigation_notifications -> loadFragment(NotificationsFragment())
+        // Configurar fragments en el BottomNavigationView
+        bottomNavigationView.setOnNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.navigation_home -> openFragment(HomeFragment())
+                R.id.navigation_search -> openFragment(SearchFragment())
+                R.id.navigation_profile -> openFragment(ProfileFragment())
                 else -> false
             }
-        })
-
-        // Cargar el fragmento inicial
-        if (savedInstanceState == null) {
-            bottomNav.selectedItemId = R.id.navigation_home
         }
     }
 
-    private fun loadFragment(fragment: Fragment): Boolean {
+    private fun openFragment(fragment: Fragment): Boolean {
         supportFragmentManager.beginTransaction()
-            .replace(android.R.id.content, fragment)
+            .replace(R.id.container, fragment)
             .commit()
         return true
     }
