@@ -1,4 +1,4 @@
-package com.example.organizeme.ui
+package com.example.organizeme
 
 import android.os.Bundle
 import android.view.View
@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.organizeme.R
 import com.example.organizeme.ui.dashboard.DashboardFragment
 import com.example.organizeme.ui.home.HomeFragment
 import com.example.organizeme.ui.notifications.NotificationsFragment
